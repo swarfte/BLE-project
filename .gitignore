@@ -1,0 +1,5 @@
+build
+.vscode
+log
+log copy
+node_modules

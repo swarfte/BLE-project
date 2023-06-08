@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "@serialport/parser-readline": "^9.0.7",
+    "fs-extra": "^10.1.0",
+    "libxmljs": "^1.0.9",
+    "node-gyp": "^9.3.1",
+    "serialport": "^9.0.7",
+    "simple-node-logger": "^18.12.24"
+  }
+}
