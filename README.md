@@ -7,7 +7,7 @@ include experiment 1~3
 > -   manjaro KDE kernel 6.1.31-2
 > -   python 3.18.6
 > -   node.js 14.21.3
-> -   esp-idf v4.2.4
+> -   esp-idf v4.1.3
 
 ## before start
 

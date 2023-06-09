@@ -482,7 +482,7 @@ void app_main(void)
     slot_config.gpio_sck  = PIN_NUM_CLK;
     slot_config.gpio_cs   = SD_PIN_NUM_CS;
     slot_config.dma_channel = 2;    // M5Stack
-
+    
 
     ret = esp_vfs_fat_sdmmc_mount("/sdcard", &host, &slot_config, &mount_config, &card);
 
