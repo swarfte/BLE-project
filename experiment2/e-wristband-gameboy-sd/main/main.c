@@ -597,20 +597,24 @@ static void ble_mesh_custom_model_cb(esp_ble_mesh_model_cb_event_t event,
                 if (count == *c) {
                     tick = xTaskGetTickCount() - tickTime; // time for response
                     ESP_LOGI(TAG,"tick: %d", tick);
-                    ESP_LOGI("[!]", ",res,%d,%d,%d,%d,%d,",
+                    ESP_LOGI("[!]", ",res,%d,%d,%d,%d,%d,%d,%d",
                         *c,
                         param->client_recv_publish_msg.length,
                         param->client_recv_publish_msg.ctx->recv_ttl,
                         param->client_recv_publish_msg.ctx->recv_rssi,
+                        tick,
+                        retry,
                         param->client_recv_publish_msg.ctx->addr
                         );
 
                     //-----
-                    fprintf(f, "res,%d,%d,%d,%d,%d \n",
+                    fprintf(f, "res,%d,%d,%d,%d,%d,%d,%d \n",
                         *c,
                         param->client_recv_publish_msg.length,
                         param->client_recv_publish_msg.ctx->recv_ttl,
                         param->client_recv_publish_msg.ctx->recv_rssi,
+                        tick,
+                        retry,
                         param->client_recv_publish_msg.ctx->addr
                         );
                     //-----
