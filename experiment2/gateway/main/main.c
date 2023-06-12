@@ -39,6 +39,9 @@
 #include "lwip/sys.h"
 #include <lwip/netdb.h>
 
+// #define M5STACK_ID 9999
+#define M5STACK_ID 0xffff
+
 #define PORT 5683
 #define HOST_IP_ADDR "172.20.10.5"
 
@@ -46,7 +49,7 @@
 
 #define CID_ESP             0x02E5
 
-#define MSG_SEND_TTL        3
+#define MSG_SEND_TTL        7
 #define MSG_SEND_REL        false
 #define MSG_TIMEOUT         4000
 #define MSG_ROLE            ROLE_NODE
@@ -281,23 +284,26 @@ static void ble_mesh_custom_model_cb(esp_ble_mesh_model_cb_event_t event,
         addr[0] = *(msg + 5);
         uint16_t *c = count;
         uint16_t *a = addr;
-        sprintf(str, "ttl: %d, c: %d, a: 0x%04x", param->client_recv_publish_msg.ctx->recv_ttl, *c, *a);
-        ESP_LOGI(TAG, "ttl: %d, c: %d, a: 0x%04x", param->client_recv_publish_msg.ctx->recv_ttl, *c, *a);
+        sprintf(str, "ttl: %d, c: %d, a: 0x%x", param->client_recv_publish_msg.ctx->recv_ttl, *c, *a);
+        ESP_LOGI(TAG, "ttl: %d, c: %d, a: 0x%x", param->client_recv_publish_msg.ctx->recv_ttl, *c, *a);
         logger(str, BLUE);
 
         // log
-        ESP_LOGI("[!]", ",recv,%d,%d,%d,%d,",
+        ESP_LOGI("[!]", ",recv,%d,%d,%d,%d,%d,",
             *c,
             param->client_recv_publish_msg.length,
             param->client_recv_publish_msg.ctx->recv_ttl,
-            param->client_recv_publish_msg.ctx->recv_rssi
+            param->client_recv_publish_msg.ctx->recv_rssi,
+            param->client_recv_publish_msg.ctx->addr
             );
     
         // 測試一, 直接回傳 ble mesh packet
         esp_ble_mesh_msg_ctx_t ctx = {0};
         ctx.net_idx = store.net_idx;
         ctx.app_idx = store.app_idx;
+
         ctx.addr = *a;
+        // ctx.addr = M5STACK_ID; // the UUID of m5stack
         ctx.send_ttl = MSG_SEND_TTL;
         ctx.send_rel = MSG_SEND_REL;
         uint16_t tid = *c;
@@ -497,6 +503,8 @@ void btn_click_b()
 void app_main(void)
 {
     ESP_LOGI(TAG, "!!! app_main !!!");
+
+    
 
     ESP_LOGI(TAG, "Initializing SPIFFS");
 

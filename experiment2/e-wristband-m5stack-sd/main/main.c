@@ -79,13 +79,15 @@ FILE* f;
 
 //-----
 
+#define M5STACK_ID 1001 // for gateway check m5stack ID, e.g. client1 -> 1001, client2 -> 1002, client3 -> 1003
+
 #define BUFSIZE 40
 
 #define TAG "MAIN"
 
 #define CID_ESP             0x02E5
 
-#define MSG_SEND_TTL        3
+#define MSG_SEND_TTL        7
 #define MSG_SEND_REL        false
 #define MSG_TIMEOUT         4000
 #define MSG_ROLE            ROLE_NODE
@@ -348,10 +350,15 @@ void btn_click_b()
     // 準備 msg
     ctx.net_idx = store.net_idx;
     ctx.app_idx = store.app_idx;
-    ctx.addr = 0xffff;
+    //ctx.addr = 0xffff; original
+    
+    ctx.addr = M5STACK_ID;
     ctx.send_ttl = MSG_SEND_TTL;
     ctx.send_rel = MSG_SEND_REL;
     opcode = OP_REQ;
+
+    // hardcode for specify
+    // ctx.m5stack_uuid = M5STACK_ID;
 
     // send
     // ESP_LOGI("btn_click_b", "send, src 0x%04x, dst 0x%04x",
@@ -360,9 +367,12 @@ void btn_click_b()
     sprintf(str, "a: %d, send: %u", action, count);
     logger(str, BLUE);
 
-    ESP_LOGI("[!]", ",%d,", count);
+    //ESP_LOGI("[!]", ",%d", count);
+    ESP_LOGI("[!]", ",%d,%d,", count,ctx.addr);
+
     //-----
-    fprintf(f, ",%d,", count);
+    //fprintf(f, ",%d,", count);
+    fprintf(f, ",%d,%d,", count,ctx.addr);
     //-----
 
 
@@ -473,10 +483,13 @@ void btn_click_a()
     // 準備 msg
     ctx.net_idx = store.net_idx;
     ctx.app_idx = store.app_idx;
-    ctx.addr = 0xffff;
+    // ctx.addr = 0xffff;
+    ctx.addr = M5STACK_ID;
     ctx.send_ttl = MSG_SEND_TTL;
     ctx.send_rel = MSG_SEND_REL;
     opcode = OP_REQ;
+
+    // ctx.m5stack_uuid = M5STACK_ID; // hardcode for gateway to identify the device
 
     // send
     // ESP_LOGI("btn_click_a", "send, src 0x%04x, dst 0x%04x",
@@ -485,9 +498,11 @@ void btn_click_a()
     // sprintf(str, "a: %d, send: %u", action, count);
     // logger(str, BLUE);
 
-    ESP_LOGI("[!]", ",req,%d,", count);
+    // ESP_LOGI("[!]", ",req,%d,", count);
+    ESP_LOGI("[!]", ",req,%d,%d,", count,ctx.addr);
     //-----
-    fprintf(f, "req,%d \n", count);
+    // fprintf(f, "req,%d \n", count);
+    fprintf(f, "req,%d,%d \n", count,ctx.addr);
     
     fclose(f);
     f = fopen(file_name,"a");
@@ -580,19 +595,21 @@ static void ble_mesh_custom_model_cb(esp_ble_mesh_model_cb_event_t event,
                 count2[0] = *(msg + 0);
                 uint16_t *c = count2;
                 if (count == *c) {
-                    ESP_LOGI("[!]", ",res,%d,%d,%d,%d,",
+                    ESP_LOGI("[!]", ",res,%d,%d,%d,%d,%d,",
                         *c,
                         param->client_recv_publish_msg.length,
                         param->client_recv_publish_msg.ctx->recv_ttl,
-                        param->client_recv_publish_msg.ctx->recv_rssi
+                        param->client_recv_publish_msg.ctx->recv_rssi,
+                        param->client_recv_publish_msg.ctx->addr // the uuid of the device
                         );
 
                     //-----
-                    fprintf(f, "res,%d,%d,%d,%d \n",
+                    fprintf(f, "res,%d,%d,%d,%d,%d, \n",
                         *c,
                         param->client_recv_publish_msg.length,
                         param->client_recv_publish_msg.ctx->recv_ttl,
-                        param->client_recv_publish_msg.ctx->recv_rssi
+                        param->client_recv_publish_msg.ctx->recv_rssi,
+                        param->client_recv_publish_msg.ctx->addr // the uuid of the m5stack
                         );
                     //-----
                     esp_timer_stop(timer);

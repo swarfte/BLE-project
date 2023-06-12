@@ -36,6 +36,9 @@
 #include "esp_err.h"
 #include <sys/stat.h>
 
+// #define GAMEBOY_ID 2001
+#define GAMEBOY_ID 0xffff
+
 #define USE_SPI_MODE
 
 // When testing SD and SPI modes, keep in mind that once the card has been
@@ -87,6 +90,9 @@ FILE* f;
 
 #define OP_REQ           ESP_BLE_MESH_MODEL_OP_3(0x01, CID_ESP)
 #define OP_RES           ESP_BLE_MESH_MODEL_OP_3(0x02, CID_ESP)
+
+int tickTime = 0;
+int tick = 0;
 
 time_t now;
 struct tm timeinfo;
@@ -340,7 +346,8 @@ void btn_click_b()
     // 準備 msg
     ctx.net_idx = store.net_idx;
     ctx.app_idx = store.app_idx;
-    ctx.addr = 0xffff;
+    // ctx.addr = 0xffff;
+    ctx.addr = GAMEBOY_ID;
     ctx.send_ttl = MSG_SEND_TTL;
     ctx.send_rel = MSG_SEND_REL;
     opcode = OP_REQ;
@@ -352,9 +359,12 @@ void btn_click_b()
     sprintf(str, "a: %d, send: %u", action, count);
     logger(str, BLUE);
 
-    ESP_LOGI("[!]", ",%d,", count);
+    //ESP_LOGI("[!]", ",%d,", count);
+    ESP_LOGI("[!]", ",%d,%d,", count,ctx.addr);
+
     //-----
-    fprintf(f, ",%d,", count);
+    //fprintf(f, ",%d,", count);
+    fprintf(f, ",%d,%d,", count,ctx.addr);
     //-----
 
 
@@ -465,7 +475,9 @@ void btn_click_a()
     // 準備 msg
     ctx.net_idx = store.net_idx;
     ctx.app_idx = store.app_idx;
-    ctx.addr = 0xffff;
+    // ctx.addr = 0xffff;
+
+    ctx.addr = GAMEBOY_ID;
     ctx.send_ttl = MSG_SEND_TTL;
     ctx.send_rel = MSG_SEND_REL;
     opcode = OP_REQ;
@@ -477,9 +489,12 @@ void btn_click_a()
     // sprintf(str, "a: %d, send: %u", action, count);
     // logger(str, BLUE);
 
-    ESP_LOGI("[!]", ",req,%d,", count);
+    // ESP_LOGI("[!]", ",req,%d,", count);
+    ESP_LOGI("[!]", ",req,%d,%d,", count, ctx.addr);
+
     //-----
-    fprintf(f, "req,%d \n", count);
+    // fprintf(f, "req,%d \n", count);
+    fprintf(f, "req,%d,%d \n", count,ctx.addr);
     
     fclose(f);
     f = fopen(file_name,"a");
@@ -496,6 +511,7 @@ void btn_click_a()
 
     //fflush(f);
     //----
+    tickTime = xTaskGetTickCount(); // time before send
 
     err = esp_ble_mesh_client_model_send_msg(vendor_client.model, &ctx, opcode,
             request->used_size + request->hdr_size, request->token - request->hdr_size,
@@ -503,6 +519,9 @@ void btn_click_a()
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "Failed to send vendor message 0x%06x", opcode);
     }
+
+    vTaskDelay(1000 / portTICK_PERIOD_MS); // delay 1 sec
+
 
     if (optlist) {
         coap_delete_optlist(optlist);
@@ -564,6 +583,7 @@ static void ble_mesh_custom_model_cb(esp_ble_mesh_model_cb_event_t event,
         ESP_LOGI(TAG, "Receive publish message 0x%06x", param->client_recv_publish_msg.opcode);
         ESP_LOG_BUFFER_HEX("recv data", param->client_recv_publish_msg.msg, param->client_recv_publish_msg.length);
 
+
         if (param->client_recv_publish_msg.opcode == OP_RES) {
             if (action == 2) {
                 uint8_t *msg = param->client_recv_publish_msg.msg;
@@ -571,24 +591,33 @@ static void ble_mesh_custom_model_cb(esp_ble_mesh_model_cb_event_t event,
                 count2[1] = *(msg + 1);
                 count2[0] = *(msg + 0);
                 uint16_t *c = count2;
+
+                // ESP_LOGI(TAG,"count:%d , count2:%d", count , count2 );
+
                 if (count == *c) {
-                    ESP_LOGI("[!]", ",res,%d,%d,%d,%d,",
+                    tick = xTaskGetTickCount() - tickTime; // time for response
+                    ESP_LOGI(TAG,"tick: %d", tick);
+                    ESP_LOGI("[!]", ",res,%d,%d,%d,%d,%d,",
                         *c,
                         param->client_recv_publish_msg.length,
                         param->client_recv_publish_msg.ctx->recv_ttl,
-                        param->client_recv_publish_msg.ctx->recv_rssi
+                        param->client_recv_publish_msg.ctx->recv_rssi,
+                        param->client_recv_publish_msg.ctx->addr
                         );
 
                     //-----
-                    fprintf(f, "res,%d,%d,%d,%d \n",
+                    fprintf(f, "res,%d,%d,%d,%d,%d \n",
                         *c,
                         param->client_recv_publish_msg.length,
                         param->client_recv_publish_msg.ctx->recv_ttl,
-                        param->client_recv_publish_msg.ctx->recv_rssi
+                        param->client_recv_publish_msg.ctx->recv_rssi,
+                        param->client_recv_publish_msg.ctx->addr
                         );
                     //-----
+
                     esp_timer_stop(timer);
                     vTaskDelay(200 / portTICK_PERIOD_MS);
+
                     retry = 0;
                     btn_click_a();
                 }

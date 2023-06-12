@@ -15,8 +15,8 @@ static void button_tap_cb(void* arg)
 
 static void board_button_init(void)
 {
-    button_handle_t btn_handle1 = iot_button_create(38, BUTTON_ACTIVE_LEVEL);
-    iot_button_set_evt_cb(btn_handle1, BUTTON_CB_RELEASE, button_tap_cb, "RELEASE");
+    // button_handle_t btn_handle1 = iot_button_create(38, BUTTON_ACTIVE_LEVEL);
+    // iot_button_set_evt_cb(btn_handle1, BUTTON_CB_RELEASE, button_tap_cb, "RELEASE");
 
     button_handle_t btn_handle2 = iot_button_create(32, BUTTON_ACTIVE_LEVEL);
     iot_button_set_evt_cb(btn_handle2, BUTTON_CB_RELEASE, button_tap_cb, "RELEASE");
