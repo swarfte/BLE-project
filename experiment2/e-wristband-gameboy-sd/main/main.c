@@ -596,7 +596,7 @@ static void ble_mesh_custom_model_cb(esp_ble_mesh_model_cb_event_t event,
 
                 if (count == *c) {
                     tick = xTaskGetTickCount() - tickTime; // time for response
-                    ESP_LOGI(TAG,"tick: %d", tick);
+                    // ESP_LOGI(TAG,"tick: %d", tick);
                     ESP_LOGI("[!]", ",res,%d,%d,%d,%d,%d,%d,%d",
                         *c,
                         param->client_recv_publish_msg.length,

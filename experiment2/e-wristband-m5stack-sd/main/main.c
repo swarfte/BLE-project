@@ -36,6 +36,9 @@
 #include "esp_err.h"
 #include <sys/stat.h>
 
+// #define M5STACK_ID 2101
+#define M5STACK_ID 0xffff
+
 #define USE_SPI_MODE
 
 // When testing SD and SPI modes, keep in mind that once the card has been
@@ -79,8 +82,6 @@ FILE* f;
 
 //-----
 
-#define M5STACK_ID 1001 // for gateway check m5stack ID, e.g. client1 -> 1001, client2 -> 1002, client3 -> 1003
-
 #define BUFSIZE 40
 
 #define TAG "MAIN"
@@ -97,6 +98,9 @@ FILE* f;
 
 #define OP_REQ           ESP_BLE_MESH_MODEL_OP_3(0x01, CID_ESP)
 #define OP_RES           ESP_BLE_MESH_MODEL_OP_3(0x02, CID_ESP)
+
+int tickTime = 0;
+int tick = 0;
 
 time_t now;
 struct tm timeinfo;
@@ -357,8 +361,6 @@ void btn_click_b()
     ctx.send_rel = MSG_SEND_REL;
     opcode = OP_REQ;
 
-    // hardcode for specify
-    // ctx.m5stack_uuid = M5STACK_ID;
 
     // send
     // ESP_LOGI("btn_click_b", "send, src 0x%04x, dst 0x%04x",
@@ -519,6 +521,7 @@ void btn_click_a()
 
     //fflush(f);
     //-----
+    tickTime = xTaskGetTickCount(); // time before send
 
     err = esp_ble_mesh_client_model_send_msg(vendor_client.model, &ctx, opcode,
             request->used_size + request->hdr_size, request->token - request->hdr_size,
@@ -526,6 +529,8 @@ void btn_click_a()
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "Failed to send vendor message 0x%06x", opcode);
     }
+
+     vTaskDelay(1000 / portTICK_PERIOD_MS); // delay 1 sec
 
     if (optlist) {
         coap_delete_optlist(optlist);
@@ -595,20 +600,25 @@ static void ble_mesh_custom_model_cb(esp_ble_mesh_model_cb_event_t event,
                 count2[0] = *(msg + 0);
                 uint16_t *c = count2;
                 if (count == *c) {
-                    ESP_LOGI("[!]", ",res,%d,%d,%d,%d,%d,",
+                    tick = xTaskGetTickCount() - tickTime; // time for response
+                    ESP_LOGI("[!]", ",res,%d,%d,%d,%d,%d,%d,%d",
                         *c,
                         param->client_recv_publish_msg.length,
                         param->client_recv_publish_msg.ctx->recv_ttl,
                         param->client_recv_publish_msg.ctx->recv_rssi,
+                        tick,
+                        retry,
                         param->client_recv_publish_msg.ctx->addr // the uuid of the device
                         );
 
                     //-----
-                    fprintf(f, "res,%d,%d,%d,%d,%d, \n",
+                    fprintf(f, "res,%d,%d,%d,%d,%d,%d,%d \n",
                         *c,
                         param->client_recv_publish_msg.length,
                         param->client_recv_publish_msg.ctx->recv_ttl,
                         param->client_recv_publish_msg.ctx->recv_rssi,
+                        tick,
+                        retry,
                         param->client_recv_publish_msg.ctx->addr // the uuid of the m5stack
                         );
                     //-----
