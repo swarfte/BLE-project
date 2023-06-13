@@ -28,6 +28,14 @@
 #include "protocol_examples_common.h"
 #include "esp_sntp.h"
 
+// waring!! you should choose one of them , and comment the other one
+
+// use for m5stack device
+#define M5STACK
+
+// use for gameboy device
+// #define GAMEBOY
+
 //----- for sd card
 #include "sdmmc_cmd.h"
 #include "driver/sdspi_host.h"
@@ -36,8 +44,8 @@
 #include "esp_err.h"
 #include <sys/stat.h>
 
-// #define M5STACK_ID 2101
-#define M5STACK_ID 0xffff
+// #define CLIENT_ID 2101
+#define CLIENT_ID 0xffff
 
 #define USE_SPI_MODE
 
@@ -58,8 +66,15 @@
 #define PIN_NUM_MISO 19
 #define PIN_NUM_MOSI 23
 #define PIN_NUM_CLK  18
+
+#ifdef M5STACK
 #define SD_PIN_NUM_CS   4       // M5Stack
 #define LCD_PIN_NUM_CS  14      // M5Stack
+#endif //M5STACK
+
+#ifdef GAMEBOY
+#define SD_PIN_NUM_CS   22       // Gameboy
+#endif //GAMEBOY
 
 //#define SD_FILE_NAME "/sdcard/exp2data.csv"
 #define SD_INDEX_FILE_NAME "/sdcard/index.txt"
@@ -356,7 +371,7 @@ void btn_click_b()
     ctx.app_idx = store.app_idx;
     //ctx.addr = 0xffff; original
     
-    ctx.addr = M5STACK_ID;
+    ctx.addr = CLIENT_ID;
     ctx.send_ttl = MSG_SEND_TTL;
     ctx.send_rel = MSG_SEND_REL;
     opcode = OP_REQ;
@@ -486,12 +501,10 @@ void btn_click_a()
     ctx.net_idx = store.net_idx;
     ctx.app_idx = store.app_idx;
     // ctx.addr = 0xffff;
-    ctx.addr = M5STACK_ID;
+    ctx.addr = CLIENT_ID;
     ctx.send_ttl = MSG_SEND_TTL;
     ctx.send_rel = MSG_SEND_REL;
     opcode = OP_REQ;
-
-    // ctx.m5stack_uuid = M5STACK_ID; // hardcode for gateway to identify the device
 
     // send
     // ESP_LOGI("btn_click_a", "send, src 0x%04x, dst 0x%04x",
@@ -681,8 +694,10 @@ void app_main(void)
     slot_config.gpio_mosi = PIN_NUM_MOSI;
     slot_config.gpio_sck  = PIN_NUM_CLK;
     slot_config.gpio_cs   = SD_PIN_NUM_CS;
-    slot_config.dma_channel = 2;    // M5Stack
 
+    #ifdef M5STACK
+    slot_config.dma_channel = 2;    // M5Stack
+    #endif // M5STACK
 
     ret = esp_vfs_fat_sdmmc_mount("/sdcard", &host, &slot_config, &mount_config, &card);
 
@@ -731,6 +746,9 @@ void app_main(void)
     }
     // fprintf(f, "exp2 test");
     ESP_LOGI(TAG, "sd card ready to write");
+
+    ESP_LOGI(TAG,"add the csv data header");
+    fprintf(f, "type,counter,length,ttl,rssi,tick,retry,addr \n");
     //-----
 
     //______
