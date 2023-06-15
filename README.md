@@ -31,9 +31,13 @@ include experiment 1~3
 > 1. cd to the folder which you want to flash (it should contain the main folder)
 > 2. use a usb cable connect the gateway and laptop
 > 3. modify in the main.c file, to **uncomment** the M5STACK or GAMEBOY define before **flash** ( for experiment 2)
-> 3. use the **erase_flash** command to erase the device
-> 4. use the **flash** command to flash the device
-> 5. use the **monitor** command to check the flash action whether success or not
+> 4. use the **erase_flash** command to erase the device
+> 5. use the **flash** command to flash the device
+> 6. use the **monitor** command to check the flash action whether success or not
+
+## how to connet the gateway and client node
+
+> -   source : https://docs.espressif.com/projects/esp-idf/en/v4.2.4/esp32/api-guides/esp-ble-mesh/ble-mesh-index.html#getting-started-with-esp-ble-mesh
 
 ## common command
 
