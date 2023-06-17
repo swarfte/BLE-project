@@ -28,13 +28,19 @@
 #include "protocol_examples_common.h"
 #include "esp_sntp.h"
 
+#include "esp_bt_device.h"
+
+// #include "BLEDevice.h"
+// #include "BLEServer.h"
+// #include "BLEUtils.h"
+
 // waring!! you should choose one of them , and comment the other one
 
 // use for m5stack device
-#define M5STACK
+// #define M5STACK
 
 // use for gameboy device
-// #define GAMEBOY
+#define GAMEBOY
 
 //----- for sd card
 #include "sdmmc_cmd.h"
@@ -376,7 +382,6 @@ void btn_click_b()
     ctx.send_rel = MSG_SEND_REL;
     opcode = OP_REQ;
 
-
     // send
     // ESP_LOGI("btn_click_b", "send, src 0x%04x, dst 0x%04x",
     //     myaddr, ctx.addr);
@@ -534,6 +539,11 @@ void btn_click_a()
 
     //fflush(f);
     //-----
+
+    uint8_t* address = esp_bt_dev_get_address();
+    ESP_LOGI("bt", "address: %02x:%02x:%02x:%02x:%02x:%02x",
+        address[0], address[1], address[2], address[3], address[4], address[5]);
+
     tickTime = xTaskGetTickCount(); // time before send
 
     err = esp_ble_mesh_client_model_send_msg(vendor_client.model, &ctx, opcode,
@@ -638,7 +648,7 @@ static void ble_mesh_custom_model_cb(esp_ble_mesh_model_cb_event_t event,
                     esp_timer_stop(timer);
                     vTaskDelay(200 / portTICK_PERIOD_MS);
                     retry = 0;
-                    btn_click_a();
+                    btn_click_a(); // send next request
                 }
             }
         }
@@ -756,6 +766,8 @@ void app_main(void)
     ESP_LOGI(TAG, "!!! app_main !!!");
     ESP_LOGI(TAG, "Initializing SPIFFS");
 
+
+    esp_bluedroid_enable();
 	esp_vfs_spiffs_conf_t conf = {
 		.base_path = "/spiffs",
 		.partition_label = NULL,

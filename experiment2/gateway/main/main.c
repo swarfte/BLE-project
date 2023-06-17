@@ -303,7 +303,6 @@ static void ble_mesh_custom_model_cb(esp_ble_mesh_model_cb_event_t event,
         ctx.app_idx = store.app_idx;
 
         ctx.addr = *a;
-        // ctx.addr = M5STACK_ID; // the UUID of m5stack
         ctx.send_ttl = MSG_SEND_TTL;
         ctx.send_rel = MSG_SEND_REL;
         uint16_t tid = *c;
