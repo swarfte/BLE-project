@@ -37,10 +37,10 @@
 // waring!! you should choose one of them , and comment the other one
 
 // use for m5stack device
-// #define M5STACK
+#define M5STACK
 
 // use for gameboy device
-#define GAMEBOY
+// #define GAMEBOY
 
 //----- for sd card
 #include "sdmmc_cmd.h"
@@ -101,6 +101,8 @@ esp_err_t ret;
 sdmmc_card_t* card;
 FILE* f;
 
+
+uint8_t* device_address;
 //-----
 
 #define BUFSIZE 40
@@ -540,9 +542,9 @@ void btn_click_a()
     //fflush(f);
     //-----
 
-    uint8_t* address = esp_bt_dev_get_address();
+    device_address = esp_bt_dev_get_address();
     ESP_LOGI("bt", "address: %02x:%02x:%02x:%02x:%02x:%02x",
-        address[0], address[1], address[2], address[3], address[4], address[5]);
+        device_address[0], device_address[1], device_address[2], device_address[3], device_address[4], device_address[5]);
 
     tickTime = xTaskGetTickCount(); // time before send
 
@@ -554,7 +556,7 @@ void btn_click_a()
     }
 
      vTaskDelay(1000 / portTICK_PERIOD_MS); // delay 1 sec
-
+#define M5STACK
     if (optlist) {
         coap_delete_optlist(optlist);
         optlist = NULL;
@@ -624,25 +626,27 @@ static void ble_mesh_custom_model_cb(esp_ble_mesh_model_cb_event_t event,
                 uint16_t *c = count2;
                 if (count == *c) {
                     tick = xTaskGetTickCount() - tickTime; // time for response
-                    ESP_LOGI("[!]", ",res,%d,%d,%d,%d,%d,%d,%d",
+                    ESP_LOGI("[!]", ",res,%d,%d,%d,%d,%d,%d,%d,%02x:%02x:%02x:%02x:%02x:%02x",
                         *c,
                         param->client_recv_publish_msg.length,
                         param->client_recv_publish_msg.ctx->recv_ttl,
                         param->client_recv_publish_msg.ctx->recv_rssi,
                         tick,
                         retry,
-                        param->client_recv_publish_msg.ctx->addr // the uuid of the device
+                        param->client_recv_publish_msg.ctx->addr, // the uuid of the device
+                        device_address[0], device_address[1], device_address[2], device_address[3], device_address[4], device_address[5]
                         );
 
                     //-----
-                    fprintf(f, "res,%d,%d,%d,%d,%d,%d,%d \n",
+                    fprintf(f, "res,%d,%d,%d,%d,%d,%d,%d,%02x:%02x:%02x:%02x:%02x:%02x \n",
                         *c,
                         param->client_recv_publish_msg.length,
                         param->client_recv_publish_msg.ctx->recv_ttl,
                         param->client_recv_publish_msg.ctx->recv_rssi,
                         tick,
                         retry,
-                        param->client_recv_publish_msg.ctx->addr // the uuid of the m5stack
+                        param->client_recv_publish_msg.ctx->addr, // the uuid of the m5stack
+                        device_address[0], device_address[1], device_address[2], device_address[3], device_address[4], device_address[5]
                         );
                     //-----
                     esp_timer_stop(timer);
@@ -758,7 +762,7 @@ void app_main(void)
     ESP_LOGI(TAG, "sd card ready to write");
 
     ESP_LOGI(TAG,"add the csv data header");
-    fprintf(f, "type,counter,length,ttl,rssi,tick,retry,addr \n");
+    fprintf(f, "type,counter,length,ttl,rssi,tick,retry,addr,device_address \n");
     //-----
 
     //______
