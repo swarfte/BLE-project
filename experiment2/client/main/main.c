@@ -627,25 +627,25 @@ static void ble_mesh_custom_model_cb(esp_ble_mesh_model_cb_event_t event,
                 if (count == *c) {
                     tick = xTaskGetTickCount() - tickTime; // time for response
                     ESP_LOGI("[!]", ",res,%d,%d,%d,%d,%d,%d,%d,%02x:%02x:%02x:%02x:%02x:%02x",
-                        *c,
+                        *c, // the count of the request
+                        param->client_recv_publish_msg.ctx->addr,
                         param->client_recv_publish_msg.length,
                         param->client_recv_publish_msg.ctx->recv_ttl,
                         param->client_recv_publish_msg.ctx->recv_rssi,
                         tick,
                         retry,
-                        param->client_recv_publish_msg.ctx->addr, // the uuid of the device
                         device_address[0], device_address[1], device_address[2], device_address[3], device_address[4], device_address[5]
                         );
 
                     //-----
                     fprintf(f, "res,%d,%d,%d,%d,%d,%d,%d,%02x:%02x:%02x:%02x:%02x:%02x \n",
-                        *c,
+                        *c, // the count of the request
+                        param->client_recv_publish_msg.ctx->addr,
                         param->client_recv_publish_msg.length,
                         param->client_recv_publish_msg.ctx->recv_ttl,
                         param->client_recv_publish_msg.ctx->recv_rssi,
                         tick,
                         retry,
-                        param->client_recv_publish_msg.ctx->addr, // the uuid of the m5stack
                         device_address[0], device_address[1], device_address[2], device_address[3], device_address[4], device_address[5]
                         );
                     //-----
@@ -762,7 +762,7 @@ void app_main(void)
     ESP_LOGI(TAG, "sd card ready to write");
 
     ESP_LOGI(TAG,"add the csv data header");
-    fprintf(f, "type,counter,length,ttl,rssi,tick,retry,addr,device_address \n");
+    fprintf(f, "type,count,addr,length,ttl,rssi,tick,retry,device_address \n");
     //-----
 
     //______
