@@ -294,7 +294,8 @@ static void ble_mesh_custom_model_cb(esp_ble_mesh_model_cb_event_t event,
             param->client_recv_publish_msg.length,
             param->client_recv_publish_msg.ctx->recv_ttl,
             param->client_recv_publish_msg.ctx->recv_rssi,
-            param->client_recv_publish_msg.ctx->addr
+            param->client_recv_publish_msg.ctx->addr,
+
             );
     
         // 測試一, 直接回傳 ble mesh packet

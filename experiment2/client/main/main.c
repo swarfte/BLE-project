@@ -399,11 +399,10 @@ void btn_click_b()
     fprintf(f, ",%d,%d,", count,ctx.addr);
     //-----
 
-
-
     err = esp_ble_mesh_client_model_send_msg(vendor_client.model, &ctx, opcode,
             request->used_size + request->hdr_size, request->token - request->hdr_size,
             MSG_TIMEOUT, need_rsp, MSG_ROLE);
+
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "Failed to send vendor message 0x%06x", opcode);
     }
@@ -548,15 +547,18 @@ void btn_click_a()
 
     tickTime = xTaskGetTickCount(); // time before send
 
+
+    // original
     err = esp_ble_mesh_client_model_send_msg(vendor_client.model, &ctx, opcode,
             request->used_size + request->hdr_size, request->token - request->hdr_size,
             MSG_TIMEOUT, need_rsp, MSG_ROLE);
+            
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "Failed to send vendor message 0x%06x", opcode);
     }
 
      vTaskDelay(1000 / portTICK_PERIOD_MS); // delay 1 sec
-#define M5STACK
+
     if (optlist) {
         coap_delete_optlist(optlist);
         optlist = NULL;
@@ -592,11 +594,17 @@ void btn_click_start()
 static void timer_callback(void* arg)
 {
     ESP_LOGI(TAG, "\n\n!!!!!!!!!!!!!! timeout timer called !!!!!!!!!!!!!\n\n");
+    if (action == 2 && retry == 3 ){
+        retry = 0;
+        btn_click_a();
+    }
+
     if (action == 2) {
         count--;
         retry++;
         btn_click_a();
     }
+
 }
 
 static void ble_mesh_custom_model_cb(esp_ble_mesh_model_cb_event_t event,
@@ -624,6 +632,9 @@ static void ble_mesh_custom_model_cb(esp_ble_mesh_model_cb_event_t event,
                 count2[1] = *(msg + 1);
                 count2[0] = *(msg + 0);
                 uint16_t *c = count2;
+
+                //uint8_t *dev_addr = param->client_recv_publish_msg.ctx->addr;
+
                 if (count == *c) {
                     tick = xTaskGetTickCount() - tickTime; // time for response
                     ESP_LOGI("[!]", ",res,%d,%d,%d,%d,%d,%d,%d,%02x:%02x:%02x:%02x:%02x:%02x",
@@ -635,7 +646,9 @@ static void ble_mesh_custom_model_cb(esp_ble_mesh_model_cb_event_t event,
                         tick,
                         retry,
                         device_address[0], device_address[1], device_address[2], device_address[3], device_address[4], device_address[5]
+                        // dev_addr[0], dev_addr[1], dev_addr[2], dev_addr[3], dev_addr[4], dev_addr[5]
                         );
+
 
                     //-----
                     fprintf(f, "res,%d,%d,%d,%d,%d,%d,%d,%02x:%02x:%02x:%02x:%02x:%02x \n",
@@ -771,7 +784,10 @@ void app_main(void)
     ESP_LOGI(TAG, "Initializing SPIFFS");
 
 
-    esp_bluedroid_enable();
+    esp_bluedroid_enable(); // this function used to get the device address
+    device_address = esp_bt_dev_get_address();
+
+
 	esp_vfs_spiffs_conf_t conf = {
 		.base_path = "/spiffs",
 		.partition_label = NULL,
