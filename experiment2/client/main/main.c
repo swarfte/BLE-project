@@ -377,9 +377,9 @@ void btn_click_b()
     // 準備 msg
     ctx.net_idx = store.net_idx;
     ctx.app_idx = store.app_idx;
-    //ctx.addr = 0xffff; original
+    ctx.addr = 0xffff; //original
     
-    ctx.addr = CLIENT_ID;
+    // ctx.addr = CLIENT_ID;
     ctx.send_ttl = MSG_SEND_TTL;
     ctx.send_rel = MSG_SEND_REL;
     opcode = OP_REQ;
@@ -391,12 +391,12 @@ void btn_click_b()
     sprintf(str, "a: %d, send: %u", action, count);
     logger(str, BLUE);
 
-    //ESP_LOGI("[!]", ",%d", count);
-    ESP_LOGI("[!]", ",%d,%d,", count,ctx.addr);
+    ESP_LOGI("[!]", ",%d", count);
+    // ESP_LOGI("[!]", ",%d,%d,", count,ctx.addr);
 
     //-----
-    //fprintf(f, ",%d,", count);
-    fprintf(f, ",%d,%d,", count,ctx.addr);
+    fprintf(f, ",%d,", count);
+    // fprintf(f, ",%d,%d,", count,ctx.addr);
     //-----
 
     err = esp_ble_mesh_client_model_send_msg(vendor_client.model, &ctx, opcode,
@@ -519,26 +519,26 @@ void btn_click_a()
     // sprintf(str, "a: %d, send: %u", action, count);
     // logger(str, BLUE);
 
-    // ESP_LOGI("[!]", ",req,%d,", count);
-    ESP_LOGI("[!]", ",req,%d,%d,", count,ctx.addr);
+    ESP_LOGI("[!]", ",req,%d,", count);
+    // ESP_LOGI("[!]", ",req,%d,%d,", count,ctx.addr);
     //-----
-    // fprintf(f, "req,%d \n", count);
-    fprintf(f, "req,%d,%d \n", count,ctx.addr);
+    fprintf(f, "req,%d \n", count);
+    // fprintf(f, "req,%d,%d \n", count,ctx.addr);
     
     fclose(f);
     f = fopen(file_name,"a");
 
     
     // use to close the sd card writing
-    //record++;
+    record++;
     // close the sd card writing
-    // if (record == target){
-    //     fclose(f);
-    //     esp_vfs_fat_sdmmc_unmount();
-    //     ESP_LOGI(TAG, "sd card unmount");
-    // }
+    if (record == target){
+        fclose(f);
+        esp_vfs_fat_sdmmc_unmount();
+        ESP_LOGI(TAG, "sd card unmount");
+    }
 
-    //fflush(f);
+    fflush(f);
     //-----
 
     device_address = esp_bt_dev_get_address();

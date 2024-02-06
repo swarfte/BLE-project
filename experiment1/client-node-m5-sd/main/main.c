@@ -26,53 +26,53 @@
 #include "ili9340.h"
 
 //----- for sd card
-// #include "sdmmc_cmd.h"
-// #include "driver/sdspi_host.h"
-// #include "driver/sdmmc_host.h"
-// #include "esp_vfs_fat.h"
-// #include "esp_err.h"
-// #include <sys/stat.h>
+#include "sdmmc_cmd.h"
+#include "driver/sdspi_host.h"
+#include "driver/sdmmc_host.h"
+#include "esp_vfs_fat.h"
+#include "esp_err.h"
+#include <sys/stat.h>
 
-// #define USE_SPI_MODE
+#define USE_SPI_MODE
 
-// // When testing SD and SPI modes, keep in mind that once the card has been
-// // initialized in SPI mode, it can not be reinitialized in SD mode without
-// // toggling power to the card.
+// When testing SD and SPI modes, keep in mind that once the card has been
+// initialized in SPI mode, it can not be reinitialized in SD mode without
+// toggling power to the card.
 
-// #ifdef USE_SPI_MODE
-// // Pin mapping when using SPI mode.
-// // With this mapping, SD card can be used both in SPI and 1-line SD mode.
-// // Note that a pull-up on CS line is required in SD mode.
-
-// // #define PIN_NUM_MISO 19
-// // #define PIN_NUM_MOSI 23
-// // #define PIN_NUM_CLK  18
-// // #define PIN_NUM_CS   4
+#ifdef USE_SPI_MODE
+// Pin mapping when using SPI mode.
+// With this mapping, SD card can be used both in SPI and 1-line SD mode.
+// Note that a pull-up on CS line is required in SD mode.
 
 // #define PIN_NUM_MISO 19
 // #define PIN_NUM_MOSI 23
 // #define PIN_NUM_CLK  18
-// #define SD_PIN_NUM_CS   4       // M5Stack
-// #define LCD_PIN_NUM_CS  14      // M5Stack
+// #define PIN_NUM_CS   4
 
-// //#define SD_FILE_NAME "/sdcard/exp2data.csv"
-// #define SD_INDEX_FILE_NAME "/sdcard/index.txt"
-// #endif //USE_SPI_MODEs
+#define PIN_NUM_MISO 19
+#define PIN_NUM_MOSI 23
+#define PIN_NUM_CLK  18
+#define SD_PIN_NUM_CS   4       // M5Stack
+#define LCD_PIN_NUM_CS  14      // M5Stack
 
-// int record = 0;
-// int target = 1000;
-// char file_name[100];
+//#define SD_FILE_NAME "/sdcard/exp2data.csv"
+#define SD_INDEX_FILE_NAME "/sdcard/index.txt"
+#endif //USE_SPI_MODEs
 
-// sdmmc_host_t host = SDSPI_HOST_DEFAULT();
-// sdspi_slot_config_t slot_config = SDSPI_SLOT_CONFIG_DEFAULT();
-// esp_vfs_fat_sdmmc_mount_config_t mount_config = {
-//         .format_if_mount_failed = false,
-//         .max_files = 5,
-//         .allocation_unit_size = 16 * 1024
-// };
-// esp_err_t ret;
-// sdmmc_card_t* card;
-// FILE* f;
+int record = 0;
+int target = 1000;
+char file_name[100];
+
+sdmmc_host_t host = SDSPI_HOST_DEFAULT();
+sdspi_slot_config_t slot_config = SDSPI_SLOT_CONFIG_DEFAULT();
+esp_vfs_fat_sdmmc_mount_config_t mount_config = {
+        .format_if_mount_failed = false,
+        .max_files = 5,
+        .allocation_unit_size = 16 * 1024
+};
+esp_err_t ret;
+sdmmc_card_t* card;
+FILE* f;
 
 //----- 
 
@@ -387,9 +387,9 @@ void example_ble_mesh_send_vendor_message(bool resend)
 
         ESP_LOGI("[!]", ",%lld,", idx);
         //-----
-        // fprintf(f, ",%d,", (int)idx);
-        // fclose(f);
-        // f = fopen(file_name,"a");
+        fprintf(f, ",%d,", (int)idx);
+        fclose(f);
+        f = fopen(file_name,"a");
         //-----
 
         err = esp_ble_mesh_client_model_send_msg(vendor_client.model, &ctx, opcode,
@@ -472,64 +472,64 @@ void app_main(void)
 {
 
     //-----
-    // ESP_LOGI(TAG, "Initializing SD card");
+    ESP_LOGI(TAG, "Initializing SD card");
 
-    // ESP_LOGI(TAG, "Using SPI peripheral");
+    ESP_LOGI(TAG, "Using SPI peripheral");
 
-    // slot_config.gpio_miso = PIN_NUM_MISO;
-    // slot_config.gpio_mosi = PIN_NUM_MOSI;
-    // slot_config.gpio_sck  = PIN_NUM_CLK;
-    // slot_config.gpio_cs   = SD_PIN_NUM_CS;
-    // slot_config.dma_channel = 2;    // M5Stack
+    slot_config.gpio_miso = PIN_NUM_MISO;
+    slot_config.gpio_mosi = PIN_NUM_MOSI;
+    slot_config.gpio_sck  = PIN_NUM_CLK;
+    slot_config.gpio_cs   = SD_PIN_NUM_CS;
+    slot_config.dma_channel = 2;    // M5Stack
     
 
-    // ret = esp_vfs_fat_sdmmc_mount("/sdcard", &host, &slot_config, &mount_config, &card);
+    ret = esp_vfs_fat_sdmmc_mount("/sdcard", &host, &slot_config, &mount_config, &card);
 
-    // if (ret != ESP_OK) {
-    //     if (ret == ESP_FAIL) {
-    //         ESP_LOGE(TAG, "Failed to mount filesystem. "
-    //             "If you want the card to be formatted, set format_if_mount_failed = true.");
-    //     } else {
-    //         ESP_LOGE(TAG, "Failed to initialize the card (%s). "
-    //             "Make sure SD card lines have pull-up resistors in place.", esp_err_to_name(ret));
-    //     }
-    //     return;
-    // }
+    if (ret != ESP_OK) {
+        if (ret == ESP_FAIL) {
+            ESP_LOGE(TAG, "Failed to mount filesystem. "
+                "If you want the card to be formatted, set format_if_mount_failed = true.");
+        } else {
+            ESP_LOGE(TAG, "Failed to initialize the card (%s). "
+                "Make sure SD card lines have pull-up resistors in place.", esp_err_to_name(ret));
+        }
+        return;
+    }
 
-    // sdmmc_card_print_info(stdout, card);
+    sdmmc_card_print_info(stdout, card);
 
-    // // ############# create new file
+    // ############# create new file
 
-    // ESP_LOGI(TAG, "initialization file name");
-    // FILE* index_file;
-    // int number = 0;
-    // if((index_file = fopen(SD_INDEX_FILE_NAME,"r"))){
-    //     fscanf(index_file,"%d",&number);
-    //     fclose(index_file);
-    // }else{
-    //     index_file = fopen(SD_INDEX_FILE_NAME,"w");
-    //     fprintf(index_file,"0");
-    //     fclose(index_file);
-    // }
+    ESP_LOGI(TAG, "initialization file name");
+    FILE* index_file;
+    int number = 0;
+    if((index_file = fopen(SD_INDEX_FILE_NAME,"r"))){
+        fscanf(index_file,"%d",&number);
+        fclose(index_file);
+    }else{
+        index_file = fopen(SD_INDEX_FILE_NAME,"w");
+        fprintf(index_file,"0");
+        fclose(index_file);
+    }
 
-    // sprintf(file_name,"/sdcard/%d.csv",number);
-    // ESP_LOGI(TAG, "file name %s",file_name);
+    sprintf(file_name,"/sdcard/%d.csv",number);
+    ESP_LOGI(TAG, "file name %s",file_name);
 
-    // ESP_LOGI(TAG, "update file name");
-    // index_file = fopen(SD_INDEX_FILE_NAME,"w");
-    // fprintf(index_file,"%d",number+1);
-    // fclose(index_file);
+    ESP_LOGI(TAG, "update file name");
+    index_file = fopen(SD_INDEX_FILE_NAME,"w");
+    fprintf(index_file,"%d",number+1);
+    fclose(index_file);
     
-    // // #############
+    // #############
 
-    // ESP_LOGI(TAG, "Opening file");
-    // f = fopen(file_name,"a");
-    // if (f == NULL) {
-    //     ESP_LOGE(TAG, "Failed to open file for writing");
-    //     return;
-    // }
-    // // fprintf(f, "exp2 test");
-    // ESP_LOGI(TAG, "sd card ready to write");
+    ESP_LOGI(TAG, "Opening file");
+    f = fopen(file_name,"a");
+    if (f == NULL) {
+        ESP_LOGE(TAG, "Failed to open file for writing");
+        return;
+    }
+    // fprintf(f, "exp2 test");
+    ESP_LOGI(TAG, "sd card ready to write");
     //-----
 
 
