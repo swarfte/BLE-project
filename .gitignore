@@ -3,3 +3,4 @@ build
 log
 log copy
 node_modules
+.cache

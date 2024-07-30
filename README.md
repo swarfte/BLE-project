@@ -4,10 +4,10 @@ include experiment 1~3
 
 ## tested envirenment
 
-> -   manjaro KDE kernel 6.1.31-2
+> -   windows 11
 > -   python 3.8.16
 > -   node.js 14.21.3
-> -   esp-idf 4.1.3
+> -   esp-idf 4.4.8
 > -   nRF Mesh 3.3.0
 
 ## before start
