@@ -285,7 +285,7 @@ static void prov_complete(uint16_t net_idx, uint16_t addr, uint8_t flags, uint32
 {
     ESP_LOGI(TAG, "!!! prov_complete !!!");
     ESP_LOGI(TAG, "net_idx: 0x%04x, addr: 0x%04x", net_idx, addr);
-    ESP_LOGI(TAG, "flags: 0x%02x, iv_index: 0x%08x", flags, iv_index);
+    ESP_LOGI(TAG, "flags: 0x%02x, iv_index: 0x%08x", (unsigned int)flags, (unsigned int)iv_index);
     myaddr = addr;
     // board_led_operation(LED_G, LED_OFF);
     store.net_idx = net_idx;
@@ -393,7 +393,7 @@ void example_ble_mesh_send_vendor_message(bool resend)
                 sizeof(idx), (uint8_t *)&idx,
                 MSG_TIMEOUT, false, MSG_ROLE);
         if (err != ESP_OK) {
-            ESP_LOGE(TAG, "Failed to send vendor message 0x%06x", opcode);
+            ESP_LOGE(TAG, "Failed to send vendor message 0x%06x", (unsigned int)opcode);
             return;
         }
 
@@ -408,11 +408,11 @@ static void example_ble_mesh_custom_model_cb(esp_ble_mesh_model_cb_event_t event
 
     switch (event) {
     case ESP_BLE_MESH_MODEL_OPERATION_EVT:
-        ESP_LOGI(TAG, "Recv 0x%06x, tid 0x%04x", param->model_operation.opcode, store.tid);
+        ESP_LOGI(TAG, "Recv 0x%06x, tid 0x%04x", (unsigned int)param->model_operation.opcode, (unsigned int)store.tid);
         break;
     case ESP_BLE_MESH_MODEL_SEND_COMP_EVT:
         if (param->model_send_comp.err_code) {
-            ESP_LOGE(TAG, "Failed to send message 0x%06x", param->model_send_comp.opcode);
+            ESP_LOGE(TAG, "Failed to send message 0x%06x", (unsigned int)param->model_send_comp.opcode);
             break;
         }
         // ESP_LOGI(TAG, "Send 0x%06x", param->model_send_comp.opcode);
@@ -426,7 +426,7 @@ static void example_ble_mesh_custom_model_cb(esp_ble_mesh_model_cb_event_t event
         // uint16_t dstaddr = param->client_recv_publish_msg.ctx->recv_dst;
         break;
     case ESP_BLE_MESH_CLIENT_MODEL_SEND_TIMEOUT_EVT:
-        ESP_LOGW(TAG, "Client message 0x%06x timeout", param->client_send_timeout.opcode);
+        ESP_LOGW(TAG, "Client message 0x%06x timeout", (unsigned int)param->client_send_timeout.opcode);
         // example_ble_mesh_send_vendor_message(true);
         break;
     default:

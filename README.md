@@ -7,7 +7,7 @@ include experiment 1~3
 > -   windows 11
 > -   python 3.8.16
 > -   node.js 14.21.3
-> -   esp-idf 4.4.8
+> -   esp-idf 5.3.0
 > -   nRF Mesh 3.3.0
 
 ## before start
